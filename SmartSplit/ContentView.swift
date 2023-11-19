@@ -25,7 +25,7 @@ struct ContentView: View {
         ReceiptItem(itemName: "Item 3", value: nil)
     ]
     
-    @State private var currency: Locale.Currency = Locale.current.currency ?? FALLBACK_CURRENCY
+    @State private var currencyCode: String = Locale.current.currency?.identifier ?? FALLBACK_CURRENCY.identifier
     
     private var receiptTotal: Decimal {
         receiptItems.reduce(0, { runningTotal, receiptItem in
@@ -36,17 +36,23 @@ struct ContentView: View {
     var body: some View {
         VStack {
             HStack {
-                Text("Currency: \(currency.identifier)")
+                Text("Currency: \(currencyCode)")
+                Picker("", selection: $currencyCode) {
+                    ForEach(Locale.commonISOCurrencyCodes, id: \.self) { code in
+                        Text("\(code)").tag(code)
+                    }
+                }.pickerStyle(.menu)
             }
             
             List($receiptItems) { receiptItem in
                 HStack {
                     TextField("Item name", text: receiptItem.itemName)
-                    TextField("Price", value: receiptItem.value, format: .currency(code: currency.identifier))
+                    TextField("Price", value: receiptItem.value, format: .currency(code: currencyCode))
+                        .keyboardType(.decimalPad)
                 }
             }
             
-            Text("Running Total: \(receiptTotal.formatted(.currency(code: currency.identifier)))")
+            Text("Running Total: \(receiptTotal.formatted(.currency(code: currencyCode)))")
             
             Button(action: addField) {
                 Image(systemName: "plus.circle").imageScale(.large).foregroundColor(.accentColor)
@@ -64,10 +70,6 @@ struct ContentView: View {
     
     private func addField() {
         receiptItems.append(ReceiptItem(itemName: "Item " + (receiptItems.count + 1).formatted(), value: nil))
-    }
-    
-    private func updateCurrency(newCurrency: Locale.Currency) {
-        currency = newCurrency
     }
  }
 
