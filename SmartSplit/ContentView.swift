@@ -10,7 +10,7 @@
 
 import SwiftUI
 
-struct ReceiptItem: Identifiable {
+struct ReceiptItem: Identifiable, Equatable {
     let id = UUID()
     var itemName: String
     var value: Decimal?
@@ -20,9 +20,9 @@ let FALLBACK_CURRENCY = Locale.Currency("GBP")
 
 struct ContentView: View {
     @State private var receiptItems: [ReceiptItem] = [
-        ReceiptItem(itemName: "Item 1", value: nil),
-        ReceiptItem(itemName: "Item 2", value: nil),
-        ReceiptItem(itemName: "Item 3", value: nil)
+        ReceiptItem(itemName: "", value: nil),
+        ReceiptItem(itemName: "", value: nil),
+        ReceiptItem(itemName: "", value: nil)
     ]
     
     @State private var currencyCode: String = Locale.current.currency?.identifier ?? FALLBACK_CURRENCY.identifier
@@ -37,26 +37,26 @@ struct ContentView: View {
     
     @State private var showMaxFieldsAlert: Bool = false
     
+    @State private var textPlaceholder: String = ""
+    
     private var receiptTotal: Decimal {
         receiptItems.reduce(0, { runningTotal, receiptItem in
             runningTotal + (receiptItem.value ?? 0)
         })
     }
     
+    private var priceEntered: Bool {
+        receiptTotal > 0
+    }
+    
     var body: some View {
-        VStack {
-            currencyLabelPicker
-            receiptItemList
-            
-            Text("Running Total: \(receiptTotal.formatted(.currency(code: currencyCode)))")
-            
-            if(showFieldsToAddCount){
-                Text("Items to add: \(fieldsToAdd)")
+        NavigationStack() {
+            VStack {
+                topBlock
+                receiptItemList
+                bottomBlock
             }
-            
-            addItemsButton
         }
-        
     }
     
     private var currencyLabelPicker: some View {
@@ -70,14 +70,65 @@ struct ContentView: View {
         }
     }
     
+    private var topBlock: some View {
+        HStack {
+            Spacer()
+            currencyLabelPicker
+            Spacer()
+            NavigationLink("Next") {
+                SecondView(receiptItems: receiptItems, currencyCode: currencyCode)
+            }
+            .disabled(!priceEntered)
+            Spacer()
+        }
+    }
+    
     private var receiptItemList: some View {
-        List($receiptItems) { receiptItem in
-            HStack {
-                TextField("Item name", text: receiptItem.itemName)
-                TextField("Price", value: receiptItem.value, format: .currency(code: currencyCode))
-                    .keyboardType(.decimalPad)
+        List {
+            ForEach($receiptItems.indices, id: \.self) { index in
+                HStack {
+                    TextField("Item \(index)", text: $receiptItems[index].itemName)
+                    TextField("Price", value: $receiptItems[index].value, format: .currency(code: currencyCode))
+                        .keyboardType(.decimalPad)
+                }
             }
         }
+    }
+    
+    private var bottomBlock: some View {
+        VStack {
+            runningTotalBlock
+            addItemsBlock
+        }
+    }
+    
+    private var runningTotalBlock: some View {
+        Text("Running Total: \(receiptTotal.formatted(.currency(code: currencyCode)))")
+    }
+    
+    private var addItemsBlock: some View {
+        GeometryReader { geometry in
+            HStack(spacing: 0) {
+                Spacer().frame(width: geometry.size.width / 12)
+                
+                if showFieldsToAddCount {
+                    Text("Items to add: \(fieldsToAdd)")
+                        .multilineTextAlignment(.center)
+                        .frame(width:  geometry.size.width / 3)
+                } else {
+                    Text("Tap or swipe to add more items")
+                        .multilineTextAlignment(.center)
+                        .frame(width:  geometry.size.width / 3)
+                }
+                
+                addItemsButton
+                    .frame(width: geometry.size.width / 6)
+                
+                Spacer()
+            }
+            .frame(height: 45)
+        }
+        .frame(height: 45)
     }
     
     private var addItemsButton: some View {
@@ -108,7 +159,7 @@ struct ContentView: View {
                 }
         )
         .sheet(isPresented: $showFieldsToAddDialog, onDismiss: addFieldsAndReset) {
-            itemsToAddSheet
+            itemsToAddSheet.presentationDetents([.height(100.0), .fraction(0.15), .medium])
         }
         .alert(isPresented: $showMaxFieldsAlert){
             maxLimitReachedAlert
@@ -127,7 +178,7 @@ struct ContentView: View {
                     maxLimitReachedAlert
                 }
             Button("Add", action: { showFieldsToAddDialog.toggle() })
-        }.padding()
+        }.padding().fixedSize()
     }
     
     private var maxLimitReachedAlert: Alert {
@@ -153,7 +204,7 @@ struct ContentView: View {
     }
     
     private func addOneField() {
-        receiptItems.append(ReceiptItem(itemName: "Item " + (receiptItems.count + 1).formatted(), value: nil))
+        receiptItems.append(ReceiptItem(itemName: "", value: nil))
     }
     
     private func calculateFieldCountFromDrag(amount: CGSize) -> Int {
