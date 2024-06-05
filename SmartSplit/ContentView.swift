@@ -16,14 +16,34 @@ struct ReceiptItem: Identifiable, Equatable {
     var value: Decimal?
 }
 
+struct Receipt {
+    var items: [ReceiptItem]
+    var serviceCharge: Decimal
+    
+    init(items: [ReceiptItem]) {
+        self.items = items
+        self.serviceCharge = 0
+    }
+    
+    func receiptTotal() -> Decimal {
+        self.items.reduce(0, { runningTotal, receiptItem in
+            runningTotal + (receiptItem.value ?? 0)
+        })
+    }
+    
+    func receiptTotalWithServiceCharge() -> Decimal {
+        self.receiptTotal() * (1 + serviceCharge)
+    }
+}
+
 let FALLBACK_CURRENCY = Locale.Currency("GBP")
 
 struct ContentView: View {
-    @State private var receiptItems: [ReceiptItem] = [
+    @State private var receipt: Receipt = Receipt(items: [
         ReceiptItem(itemName: "", value: nil),
         ReceiptItem(itemName: "", value: nil),
         ReceiptItem(itemName: "", value: nil)
-    ]
+    ])
     
     @State private var currencyCode: String = Locale.current.currency?.identifier ?? FALLBACK_CURRENCY.identifier
     
@@ -39,14 +59,8 @@ struct ContentView: View {
     
     @State private var textPlaceholder: String = ""
     
-    private var receiptTotal: Decimal {
-        receiptItems.reduce(0, { runningTotal, receiptItem in
-            runningTotal + (receiptItem.value ?? 0)
-        })
-    }
-    
     private var priceEntered: Bool {
-        receiptTotal > 0
+        receipt.receiptTotal() > 0
     }
     
     var body: some View {
@@ -76,7 +90,7 @@ struct ContentView: View {
             currencyLabelPicker
             Spacer()
             NavigationLink("Next") {
-                SecondView(receiptItems: receiptItems, currencyCode: currencyCode)
+                SecondView(receipt: $receipt, currencyCode: currencyCode)
             }
             .disabled(!priceEntered)
             Spacer()
@@ -85,11 +99,12 @@ struct ContentView: View {
     
     private var receiptItemList: some View {
         List {
-            ForEach($receiptItems.indices, id: \.self) { index in
+            ForEach($receipt.items.indices, id: \.self) { index in
                 HStack {
-                    TextField("Item \(index)", text: $receiptItems[index].itemName)
-                    TextField("Price", value: $receiptItems[index].value, format: .currency(code: currencyCode))
-                        .keyboardType(.decimalPad)
+                    TextField("Item \(index)", text: $receipt.items[index].itemName).multilineTextAlignment(.leading)
+                    Spacer()
+                    TextField("Price", value: $receipt.items[index].value, format: .currency(code: currencyCode))
+                        .keyboardType(.decimalPad).multilineTextAlignment(.trailing)
                 }
             }
         }
@@ -103,7 +118,7 @@ struct ContentView: View {
     }
     
     private var runningTotalBlock: some View {
-        Text("Running Total: \(receiptTotal.formatted(.currency(code: currencyCode)))")
+        Text("Running Total: \(receipt.receiptTotal().formatted(.currency(code: currencyCode)))")
     }
     
     private var addItemsBlock: some View {
@@ -190,8 +205,8 @@ struct ContentView: View {
     }
     
     private func validateNumberOfFields(requestedVal: Int) {
-        if(requestedVal + receiptItems.count > 50){
-            fieldsToAdd = 50 - receiptItems.count
+        if(requestedVal + receipt.items.count > 50){
+            fieldsToAdd = 50 - receipt.items.count
             showMaxFieldsAlert = true
         }
     }
@@ -204,7 +219,7 @@ struct ContentView: View {
     }
     
     private func addOneField() {
-        receiptItems.append(ReceiptItem(itemName: "", value: nil))
+        receipt.items.append(ReceiptItem(itemName: "", value: nil))
     }
     
     private func calculateFieldCountFromDrag(amount: CGSize) -> Int {
