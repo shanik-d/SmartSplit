@@ -19,20 +19,32 @@ struct ReceiptItem: Identifiable, Equatable {
 struct Receipt {
     var items: [ReceiptItem]
     var serviceCharge: Decimal
-    
+
     init(items: [ReceiptItem]) {
         self.items = items
-        self.serviceCharge = 0
+        self.serviceCharge = .zero
     }
-    
+
     func receiptTotal() -> Decimal {
-        self.items.reduce(0, { runningTotal, receiptItem in
-            runningTotal + (receiptItem.value ?? 0)
+        let total = self.items.reduce(Decimal.zero, { runningTotal, receiptItem in
+            runningTotal + (receiptItem.value ?? .zero)
         })
+        return total.rounded(toPlaces: 2)
     }
-    
+
     func receiptTotalWithServiceCharge() -> Decimal {
-        self.receiptTotal() * (1 + serviceCharge)
+        let totalWithCharge = self.receiptTotal() * (1 + serviceCharge)
+        return totalWithCharge.rounded(toPlaces: 2)
+    }
+}
+
+private extension Decimal {
+    /// Returns the decimal rounded to the specified number of fractional digits using bankers rounding.
+    func rounded(toPlaces scale: Int, roundingMode: NSDecimalNumber.RoundingMode = .bankers) -> Decimal {
+        var value = self
+        var roundedValue = Decimal()
+        NSDecimalRound(&roundedValue, &value, scale, roundingMode)
+        return roundedValue
     }
 }
 

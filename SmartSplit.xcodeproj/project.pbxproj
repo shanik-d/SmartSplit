@@ -14,6 +14,7 @@
 		E056C6842B0A27DC00BC16C6 /* SmartSplitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E056C6832B0A27DC00BC16C6 /* SmartSplitTests.swift */; };
 		E056C68E2B0A27DC00BC16C6 /* SmartSplitUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E056C68D2B0A27DC00BC16C6 /* SmartSplitUITests.swift */; };
 		E056C6902B0A27DC00BC16C6 /* SmartSplitUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E056C68F2B0A27DC00BC16C6 /* SmartSplitUITestsLaunchTests.swift */; };
+		E07205F62C0E5801007CC802 /* SecondView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E07205F52C0E5801007CC802 /* SecondView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,6 +45,7 @@
 		E056C6892B0A27DC00BC16C6 /* SmartSplitUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SmartSplitUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E056C68D2B0A27DC00BC16C6 /* SmartSplitUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartSplitUITests.swift; sourceTree = "<group>"; };
 		E056C68F2B0A27DC00BC16C6 /* SmartSplitUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartSplitUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		E07205F52C0E5801007CC802 /* SecondView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecondView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -94,6 +96,7 @@
 		E056C6712B0A27DB00BC16C6 /* SmartSplit */ = {
 			isa = PBXGroup;
 			children = (
+				E07205F52C0E5801007CC802 /* SecondView.swift */,
 				E056C6722B0A27DB00BC16C6 /* SmartSplitApp.swift */,
 				E056C6742B0A27DB00BC16C6 /* ContentView.swift */,
 				E056C6762B0A27DC00BC16C6 /* Assets.xcassets */,
@@ -257,6 +260,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E07205F62C0E5801007CC802 /* SecondView.swift in Sources */,
 				E056C6752B0A27DB00BC16C6 /* ContentView.swift in Sources */,
 				E056C6732B0A27DB00BC16C6 /* SmartSplitApp.swift in Sources */,
 			);

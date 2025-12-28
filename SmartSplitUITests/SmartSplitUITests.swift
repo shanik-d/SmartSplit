@@ -22,12 +22,20 @@ final class SmartSplitUITests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
-    func testExample() throws {
-        // UI tests must launch the application that they test.
+    func testNextButtonEnablesAfterEnteringPrice() throws {
         let app = XCUIApplication()
         app.launch()
 
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+        let nextButton = app.buttons["Next"]
+        XCTAssertFalse(nextButton.isEnabled, "Next should be disabled before any price is entered")
+
+        let priceField = app.textFields.element(boundBy: 1) // first price field in the list
+        XCTAssertTrue(priceField.waitForExistence(timeout: 2), "Price field should exist on launch")
+
+        priceField.tap()
+        priceField.typeText("12.50")
+
+        XCTAssertTrue(nextButton.isEnabled, "Next should enable once a valid price is entered")
     }
 
     func testLaunchPerformance() throws {
