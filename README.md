@@ -167,3 +167,9 @@ func testUIStabilityWithFiftyItems()
 - Tooling: adopt swiftformat + swiftlint with a shared config; add per-target build settings checks (treat warnings as errors for app/logic).
 - Testing depth: add unit tests for split math, currency changes, and rounding reconciliation; broaden UI tests to cover add/delete items, per-person assignment, and share flow.
 - Observability: enable OSLog for key flows; add crash reporting and minimal, privacy-respecting analytics with opt-out.
+
+## UX/Feature Follow-ups
+- Refine assignment popover styling/behavior: more responsive/dynamic sizing and layout polish.
+- Add a person-centric assignment screen where each diner can tick all items they ate.
+- Add a summary screen that shows all items, assignments, per-person totals, and service.
+- Support multiple quantities per item (e.g., 3× fries) in both entry and assignment flows.

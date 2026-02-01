@@ -41,4 +41,40 @@ final class SmartSplitTests: XCTestCase {
 
         XCTAssertEqual(receipt.receiptTotalWithServiceCharge(), Decimal(string: "25.31"))
     }
+    
+    func testPerPersonTotalsSplitEvenlyWithService() {
+        let dinerA = Diner(name: "Alex")
+        let dinerB = Diner(name: "Sam")
+        
+        let item = ReceiptItem(itemName: "Pasta", value: Decimal(string: "10.00"))
+        var receipt = Receipt(items: [item])
+        receipt.serviceCharge = Decimal(string: "0.10")! // 10%
+        
+        let assignments: [UUID: Set<UUID>] = [
+            item.id: Set([dinerA.id, dinerB.id])
+        ]
+        
+        let totals = receipt.perPersonTotals(diners: [dinerA, dinerB], assignments: assignments)
+        let alexTotal = totals.first(where: { $0.diner.id == dinerA.id })
+        let samTotal = totals.first(where: { $0.diner.id == dinerB.id })
+        
+        XCTAssertEqual(alexTotal?.subtotal, Decimal(string: "5.00"))
+        XCTAssertEqual(alexTotal?.service, Decimal(string: "0.50"))
+        XCTAssertEqual(samTotal?.subtotal, Decimal(string: "5.00"))
+        XCTAssertEqual(samTotal?.service, Decimal(string: "0.50"))
+    }
+    
+    func testServiceNotAllocatedWhenNoAssignments() {
+        let dinerA = Diner(name: "Alex")
+        let dinerB = Diner(name: "Sam")
+        
+        let item = ReceiptItem(itemName: "Pasta", value: Decimal(string: "10.00"))
+        var receipt = Receipt(items: [item])
+        receipt.serviceCharge = Decimal(string: "0.10")! // 10%
+        
+        let assignments: [UUID: Set<UUID>] = [:] // no assignments
+        
+        let totals = receipt.perPersonTotals(diners: [dinerA, dinerB], assignments: assignments)
+        XCTAssertTrue(totals.allSatisfy { $0.service == .zero && $0.total == .zero })
+    }
 }
